@@ -7,7 +7,12 @@ const moment = require('moment-timezone');
 
 // Validate username/password exists
 if (!process.env.ROBINHOOD_USERNAME || !process.env.ROBINHOOD_PASSWORD) {
-  pushLog("Robinhood username or password missing")
+  log("Robinhood username or password missing")
+  process.exit(1)
+}
+
+if(!process.env.ROBINHOOD_SYMBOL) {
+  log("You have not selected a symbol")
   process.exit(1)
 }
 
@@ -26,14 +31,14 @@ if (!process.env.ROBINHOOD_USERNAME || !process.env.ROBINHOOD_PASSWORD) {
     let shareCount = 0
     let shareCost = 0
     let upPercent = 1.10
-    let downPercent = .90
+    let downPercent = .05
     let bailPercent = 0.75
     let priceHistory = []
 
     do {
       //Get the quote for
       await sleep(1000 * 10)
-      let symbol = "MTBC"
+      let symbol = process.env.ROBINHOOD_SYMBOL
       let security = await robinhood.getQuote({ symbol: symbol })
       log('Qoute for: ',symbol, " @ ", security.ask_price)
 
@@ -93,7 +98,7 @@ if (!process.env.ROBINHOOD_USERNAME || !process.env.ROBINHOOD_PASSWORD) {
           //if we cannot buy anything with 10% of our funds, buy as much as we can
           quantity = Math.floor(buyingPower / security.last_trade_price)
         }
-        log("Attempting to buy", quantity, "shares of", symbol, "at $", security.bid_price, "per share")
+        log("Attempting to buy", quantity, "shares of", symbol, "at $", security.last_trade_price, "per share")
 
         let buy = {
           account: "TEST URL",
